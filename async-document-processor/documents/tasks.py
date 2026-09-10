@@ -61,10 +61,10 @@ def send_welcome_email(user_id):
 @shared_task
 def send_welcome_email_with_nx(user_id):
     key = f"email_sent:{user_id}"
-    
+
     acquired = r.set(
         key,
-        "processing",
+        "1",
         nx=True,
         ex=300
     )
