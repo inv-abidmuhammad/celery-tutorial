@@ -56,3 +56,20 @@ def send_welcome_email(user_id):
 
     # Mark as completed
     r.set(key, "1")
+
+
+@shared_task
+def send_welcome_email_with_nx(user_id):
+    key = f"email_sent:{user_id}"
+    
+    acquired = r.set(
+        key,
+        "processing",
+        nx=True,
+        ex=300
+    )
+
+    if not acquired:
+        return "Already processing/processed"
+
+    send_email(user_id)
