@@ -1,11 +1,16 @@
 from .redis_client import r
 from celery import shared_task
 
-from .utils import send_email
+import time
+from datetime import datetime
+
+
+from .utils import send_mail
 
 
 @shared_task
 def add(x, y):
+    print(f"Adding {x} + {y}")
     return x + y
 
 
@@ -52,7 +57,7 @@ def send_welcome_email(user_id):
         return "Already processed"
 
     # Do the side effect
-    send_email(user_id)
+    send_mail(user_id)
 
     # Mark as completed
     r.set(key, "1")
@@ -72,4 +77,36 @@ def send_welcome_email_with_nx(user_id):
     if not acquired:
         return "Already processing/processed"
 
-    send_email(user_id)
+    send_mail(user_id)
+
+
+@shared_task
+def heartbeat():
+    print(f"Heartbeat: {datetime.now()}")
+
+
+@shared_task
+def process_document(document_id, duration):
+    print(f"START document {document_id} — taking {duration}s")
+
+    time.sleep(duration)
+
+    print(f"FINISH document {document_id}")
+
+    return f"Document {document_id} processed"
+
+
+@shared_task(queue="slow")
+def slow_task(task_id):
+    print(f"START SLOW {task_id}")
+    time.sleep(10)
+    print(f"FINISH SLOW {task_id}")
+    return f"Slow {task_id} done"
+
+
+@shared_task(queue="fast")
+def fast_task(task_id):
+    print(f"START FAST {task_id}")
+    time.sleep(1)
+    print(f"FINISH FAST {task_id}")
+    return f"Fast {task_id} done"
