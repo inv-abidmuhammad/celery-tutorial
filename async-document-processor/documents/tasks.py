@@ -8,7 +8,7 @@ from datetime import datetime
 from .utils import send_mail
 
 
-@shared_task
+@shared_task(queue="fast")
 def add(x, y):
     print(f"Adding {x} + {y}")
     return x + y
