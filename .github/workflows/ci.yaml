@@ -73,6 +73,16 @@ jobs:
       - name: Test Redis
         run: docker compose exec -T redis redis-cli ping
 
+      - name: Test Celery
+        run: |
+          docker compose exec -T worker python manage.py shell -c '
+          from documents.tasks import add
+          result = add.delay(100, 200)
+          value = result.get(timeout=20)
+          print(f"Celery result: {value}")
+          assert value == 300
+          '
+
       - name: Stop services
         if: always()
         run: docker compose down -v
