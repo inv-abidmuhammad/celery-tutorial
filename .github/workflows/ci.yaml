@@ -42,3 +42,29 @@ jobs:
           docker build \
             -t async-document-processor:test \
             ./async-document-processor
+
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: docker-build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start services
+        run: docker compose up -d --build
+
+      - name: Show service status
+        run: docker compose ps
+
+      - name: Show service logs
+        if: always()
+        run: docker compose logs
+
+      - name: Test Redis
+        run: docker compose exec -T redis redis-cli ping
+
+      - name: Stop services
+        if: always()
+        run: docker compose down -v
