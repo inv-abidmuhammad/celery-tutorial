@@ -52,6 +52,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Create CI environment file
+        run: |
+          cat > async-document-processor/.env <<'EOF'
+          SECRET_KEY=ci-test-secret-key
+          DEBUG=False
+          ALLOWED_HOSTS=localhost,127.0.0.1
+          EOF
+
       - name: Start services
         run: docker compose up -d --build
 
